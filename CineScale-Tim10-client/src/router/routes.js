@@ -9,8 +9,11 @@ const routes = [
   },
 
   {
-    path: '/login',
-    component: () => import('pages/LoginPage.vue')
+    path: '/Login',
+    component: () => import('layouts/LoginPageLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/LoginIndex.vue') }
+    ]
   },
 
   {
