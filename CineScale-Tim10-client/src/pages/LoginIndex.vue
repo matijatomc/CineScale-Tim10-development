@@ -10,15 +10,19 @@
           </q-card-section>
           <q-card-section>
             <div class="q-gutter-md">
-              <q-input filled type="email" v-model="email" label="Your email *" hint="Email to login" lazy-rules
+              <q-input filled type="email" v-model="email" label="Your email " hint="Email to login" lazy-rules
                 :rules="[val => emailPattern.test(val) || 'Please type valid email']" />
-              <q-input filled type="password" v-model="password" label="Password *" hint="Password to login" lazy-rules
+              <q-input filled type="password" v-model="password" label="Password" hint="Password to login" lazy-rules
                 :rules="[val => val && val.length > 0 || 'Please type password']" />
             </div>
           </q-card-section>
-          <q-card-actions align="right">
+          <q-card-actions align="between">
+            <q-btn label="Register" type="button" color="secondary" @click="onRegister" />
             <q-btn label="Login" type="submit" color="primary" />
           </q-card-actions>
+          <q-card-section>
+            <div class="text-negative" v-if="errorMessage">{{ errorMessage }}</div>
+          </q-card-section>
         </q-card>
       </q-form>
     </div>
@@ -27,37 +31,41 @@
 <script>
 import { ref, inject } from 'vue'
 import { signInWithEmailAndPassword } from 'firebase/auth'
-import { Notify } from 'quasar'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'LoginIndex',
-  setup () {
+  setup (_, { root }) {
     const auth = inject('$auth')
 
     const emailPattern = /^(?=[a-zA-Z0-9@.%+-]{6,254}$)[a-zA-Z0-9.%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}.){1,8}[a-zA-Z]{2,63}$/
     const email = ref(null)
     const password = ref(null)
+    const errorMessage = ref(null)
+    const router = useRouter()
 
-    return {
-      auth,
-      email,
-      password,
-      emailPattern
-    }
-  },
-  methods: {
-    async onLogin (e) {
+    const onLogin = async (e) => {
       e.preventDefault()
       try {
-        await signInWithEmailAndPassword(this.auth, this.email, this.password)
-        this.$router.push('/')
+        await signInWithEmailAndPassword(auth, email.value, password.value)
+        router.push('/')
       } catch (error) {
         console.log(error)
-        Notify.create({ // Use Notify directly
-          type: 'negative',
-          message: error.message // display the error message from Firebase
-        })
+        errorMessage.value = 'Incorrect email or password. Please try again.'
       }
+    }
+
+    const onRegister = () => {
+      router.push('/Register')
+    }
+
+    return {
+      email,
+      password,
+      emailPattern,
+      onLogin,
+      errorMessage,
+      onRegister
     }
   }
 }

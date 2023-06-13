@@ -17,8 +17,27 @@ const routes = [
   },
 
   {
-    path: '/register',
-    component: () => import('pages/RegisterPage.vue')
+    path: '/Register',
+    component: () => import('layouts/RegisterPageLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/RegisterIndex.vue') }
+    ]
+  },
+
+  {
+    path: '/TVSeries',
+    component: () => import('layouts/TVSeriesPageLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/TVSeriesIndex.vue') }
+    ]
+  },
+
+  {
+    path: '/User',
+    component: () => import('layouts/UserPageLayout.vue'),
+    children: [
+      { path: '', component: () => import('pages/UserIndex.vue') }
+    ]
   },
 
   // Always leave this as last one,
