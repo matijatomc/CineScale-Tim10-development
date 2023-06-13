@@ -1,6 +1,6 @@
 <template>
    <div id="indexpage">
-    <div class="search-container">
+    <div class="search-container" align="center">
       <input type="text" v-model="searchInput" placeholder="Search for a movie or TV show" />
       <button @click="search">Search</button>
     </div>
@@ -29,7 +29,7 @@ export default {
     async search () {
       try {
         // Send a request to the Express server
-        const response = await axios.get('http://localhost:3000/film?naziv=' + this.searchInput)
+        const response = await axios.get('http://localhost:3000/film?zanr=' + this.searchInput)
         const data = response.data
 
         // Update the search results
