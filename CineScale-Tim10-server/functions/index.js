@@ -32,6 +32,9 @@ app.get('/film', async (request, response) => {
         : 'asc'
     )
   }
+  let zanr = (
+    typeof request.query.zanr !== "undefined" ? request.query.zanr : null
+  )
   let name = (
     typeof request.query.name !== "undefined" ? request.query.name : null
   )
