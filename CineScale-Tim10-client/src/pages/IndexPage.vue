@@ -27,17 +27,21 @@ export default {
   },
   methods: {
     async search () {
-      try {
-        // Send a request to the Express server
-        const response = await axios.get('http://localhost:3000/film?zanr=' + this.searchInput)
-        const data = response.data
+  try {
+    // Send a request to the Express server
+    const responseFilm = await axios.get('http://localhost:3000/film?name=' + this.searchInput)
+    const dataFilm = responseFilm.data
 
-        // Update the search results
-        this.searchResults = data
-      } catch (error) {
-        console.error('Error searching:', error)
-      }
-    }
+    const responseSerija = await axios.get('http://localhost:3000/serija?name=' + this.searchInput)
+    const dataSerija = responseSerija.data
+
+    // Update the search results
+    this.searchResults = [...dataFilm, ...dataSerija]
+  } catch (error) {
+    console.error('Error searching:', error)
+  }
+}
+
   }
 }
 </script>

@@ -32,16 +32,18 @@ app.get('/film', async (request, response) => {
         : 'asc'
     )
   }
-  let zanr = (
-    typeof request.query.zanr !== "undefined" ? request.query.zanr : null
+  let name = (
+    typeof request.query.name !== "undefined" ? request.query.name : null
   )
-  models.get(db, 'film', id, order, zanr)
+  
+  models.get(db, 'film', id, order, zanr, name) // pass name to the get function
     .then(res => {
       return response.send(res)
     }).catch((error) => {
       return response.send(error)
     })
-});
+  });
+  
 
 app.get('/serija', async (request, response) => {
   let id = (

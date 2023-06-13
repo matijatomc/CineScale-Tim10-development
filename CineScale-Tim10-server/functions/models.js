@@ -1,18 +1,24 @@
 module.exports = {
-    get: async function (db, collection, id, order, zanr) {
+    get: async function (db, collection, id, order, zanr, name) {
         let res = []
         if (id === null) {
-            if (order.orderAttr === null) {
-                if(zanr === null)
-                    var collectionRef = db.collection(collection)
-                else
-                    var collectionRef = db.collection(collection).where("zanr", "==", zanr)
-            } else {
-                if(zanr === null)
-                    var collectionRef = db.collection(collection).orderBy(order.orderAttr, order.orderType)
-                else 
-                    var collectionRef = db.collection(collection).orderBy(order.orderAttr, order.orderType).where("zanr", "==", zanr)
+            let collectionRef = db.collection(collection)
+
+            // If genre (zanr) is specified, add a where clause
+            if(zanr) {
+                collectionRef = collectionRef.where("zanr", "==", zanr)
             }
+            
+            // If name is specified, add a where clause
+            if(name) {
+                collectionRef = collectionRef.where("naziv", "==", name)
+            }
+
+            // If ordering is specified, add an orderBy clause
+            if(order.orderAttr) {
+                collectionRef = collectionRef.orderBy(order.orderAttr, order.orderType)
+            }
+
             return collectionRef.get()
                 .then((querySnapshot) => {
                     querySnapshot.forEach((doc) => {
