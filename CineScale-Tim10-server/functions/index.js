@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const app = express();
+app.use(cors()); 
 var admin = require("firebase-admin");
 var serviceAccount = require("./cinescale-cfad0-firebase-adminsdk-y3c14-da0596a9f5.json");
 var models = require('./models.js')
@@ -32,10 +34,10 @@ app.get('/film', async (request, response) => {
         : 'asc'
     )
   }
-  let zanr = (
-    typeof request.query.zanr !== "undefined" ? request.query.zanr : null
+  let naziv = (
+    typeof request.query.naziv !== "undefined" ? request.query.naziv : null
   )
-  models.get(db, 'film', id, order, zanr)
+  models.get(db, 'film', id, order, naziv)
     .then(res => {
       return response.send(res)
     }).catch((error) => {
@@ -61,15 +63,53 @@ app.get('/serija', async (request, response) => {
         : 'asc'
     )
   }
-  let zanr = (
-    typeof request.query.zanr !== "undefined" ? request.query.zanr : null
+  let naziv = (
+    typeof request.query.naziv !== "undefined" ? request.query.naziv : null
   )
-  models.get(db, 'serija', id, order, zanr)
+  models.get(db, 'serija', id, order, naziv)
     .then(res => {
       return response.send(res)
     }).catch((error) => {
       return response.send(error)
     })
+});
+
+app.get('/recenzije', async (req, res) => {
+  const korisnikUID = req.query.korisnikUID;
+
+  if (!korisnikUID) {
+    return res.status(400).json({ error: 'korisnikUID parameter is required.' });
+  }
+
+  const allCollections = ['film', 'serija'];
+  const reviews = [];
+
+  for (const collection of allCollections) {
+    const moviesOrSeriesSnapshot = await db.collection(collection).get();
+
+    for (const doc of moviesOrSeriesSnapshot.docs) {
+      const movieOrSeriesId = doc.id;
+      const movieOrSeriesName = doc.data().naziv; // assuming there is a 'name' field in the document
+      const reviewsSnapshot = await db.collection(collection)
+                                      .doc(movieOrSeriesId)
+                                      .collection('recenzije')
+                                      .where('korisnikUID', '==', korisnikUID)
+                                      .get();
+
+      reviewsSnapshot.forEach(reviewDoc => {
+        const review = reviewDoc.data();
+        review.movieOrSeriesId = movieOrSeriesId;
+        review.movieOrSeriesName = movieOrSeriesName; // Add the movie or series name to the review
+        reviews.push(review);
+      });
+    }
+  }
+
+  if (reviews.length === 0) {
+    return res.status(404).json({ error: 'No reviews found for the provided UID.' });
+  }
+
+  res.json(reviews);
 });
 
 app.post('/film', async (req, res) => {
