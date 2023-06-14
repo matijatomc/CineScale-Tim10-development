@@ -90,6 +90,7 @@ export default defineComponent({
         }).catch((error) => {
           console.error('Sign Out Error: ', error)
         })
+        location.reload()
       } else {
         console.log('No user is signed in.')
       }

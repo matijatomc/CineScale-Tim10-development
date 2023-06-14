@@ -12,7 +12,7 @@
         <p><strong>Genre:</strong> {{ item.zanr }}</p>
         <p><strong>Year:</strong> {{ item.godinaIzlaska }}</p>
 
-        <button @click="showAddReviewForm(item.id)" style="padding: 5px 10px; margin-top: 10px; float: right;">Add review</button>
+        <button v-if="userId" @click="showAddReviewForm(item.id)" style="padding: 5px 10px; margin-top: 10px; float: right;">Add review</button>
 
         <div v-if="addReviewMovieId === item.id"
           style="clear: both; background-color: #b5b1b1; border: 1px solid black; border-radius: 8px; padding: 20px; margin-top: 10px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);">
@@ -22,9 +22,10 @@
           <p><strong>Rating:</strong></p>
           <input v-model="newReview.ocjena" type="number" min="1" max="10" style=" width: 50px;"><br>
           <button @click="addReview(item.id, item.naziv)" style="padding: 5px 10px; margin-top: 10px;">Confirm</button>
+          <button @click="hideAddReviewForm()" style="padding: 5px 10px; margin-left: 5px; margin-top: 10px;">Cancel</button>
         </div>
 
-        <button @click="getMovieDetails(item.id)" style="padding: 5px 10px; margin-top: 10px;">Show reviews</button>
+        <button @click="getMovieReview(item.id)" style="padding: 5px 10px; margin-top: 10px;">Show reviews</button>
         <div v-if="selectedMovie && selectedMovieId === item.id"
           style=" background-color: #b5b1b1; border: 1px solid black; border-radius: 8px; padding: 20px; margin-top: 10px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);">
           <h3>Selected Movie Reviews:</h3>
@@ -76,7 +77,7 @@ export default {
         console.error('Error searching:', error)
       }
     },
-    async getMovieDetails (id) {
+    async getMovieReview (id) {
       try {
         const response = await axios.get('http://localhost:3000/film?id=' + id)
         this.selectedMovie = response.data.map(item => item.data)
@@ -103,6 +104,13 @@ export default {
         this.getMovieDetails(id)
       } catch (error) {
         console.error('Error adding review:', error)
+      }
+    },
+    hideAddReviewForm () {
+      this.addReviewMovieId = null
+      this.newReview = {
+        komentar: '',
+        ocjena: ''
       }
     }
   },

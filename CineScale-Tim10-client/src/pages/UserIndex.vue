@@ -41,11 +41,9 @@ export default {
   async created () {
     getAuth().onAuthStateChanged(async (user) => {
       if (user) {
-        // User is signed in, get the UID
         this.userId = user.uid
         await this.fetchUserReviews()
       } else {
-        // No user is signed in
         console.log('No user is signed in')
       }
     })

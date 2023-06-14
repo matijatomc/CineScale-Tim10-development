@@ -26,9 +26,8 @@ module.exports = configure(function (ctx) {
     boot: [
       'i18n',
       'axios',
-      'CineScaleSetup',
-      'quasar'
-      ],
+      'CineScaleSetup'
+    ],
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-css
     css: [
@@ -91,9 +90,6 @@ module.exports = configure(function (ctx) {
 
     // https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-framework
     framework: {
-      config: {notify: { /* Notify defaults */ }},
-      plugins: ['Notify'],
-
       // iconSet: 'material-icons', // Quasar icon set
       // lang: 'en-US', // Quasar language pack
 

@@ -42,13 +42,13 @@ export default {
     const emailPattern = /^(?=[a-zA-Z0-9@.%+-]{6,254}$)[a-zA-Z0-9.%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}.){1,8}[a-zA-Z]{2,63}$/
     const email = ref(null)
     const password = ref(null)
-    const confirmPassword = ref(null) // New ref for the confirm password
+    const confirmPassword = ref(null)
     const errorMessage = ref(null)
     const router = useRouter()
 
     const onRegister = async (e) => {
       e.preventDefault()
-      if (password.value !== confirmPassword.value) { // Compare the two passwords
+      if (password.value !== confirmPassword.value) {
         errorMessage.value = 'Passwords do not match.'
         return
       }
@@ -64,7 +64,7 @@ export default {
     return {
       email,
       password,
-      confirmPassword, // Return the new ref so it's available in the template
+      confirmPassword,
       emailPattern,
       onRegister,
       errorMessage
