@@ -11,8 +11,19 @@
         <p><strong>Genre:</strong> {{ item.zanr }}</p>
         <p><strong>Year:</strong> {{ item.godinaIzlaska }}</p>
         <p><strong>Nuber of episodes:</strong> {{ item.brojEpizoda }}</p>
-        <button @click="getTVSeriesDetails(item.id)" style="padding: 5px 10px; margin-top: 10px;">Get details</button>
 
+        <button @click="showAddReviewForm(item.id)" style="padding: 5px 10px; margin-top: 10px; float: right;">Add review</button>
+        <div v-if="addReviewTVSeriesId === item.id"
+          style="clear: both; background-color: #b5b1b1; border: 1px solid black; border-radius: 8px; padding: 20px; margin-top: 10px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);">
+          <h3>Add a review:</h3>
+          <p><strong>Comment:</strong></p>
+          <textarea v-model="newReview.komentar" style="width: 100%; height: 100px;"></textarea>
+          <p><strong>Rating:</strong></p>
+          <input v-model="newReview.ocjena" type="number" min="1" max="10" style=" width: 50px;"><br>
+          <button @click="addReview(item.id, item.naziv)" style="padding: 5px 10px; margin-top: 10px;">Confirm</button>
+        </div>
+
+        <button @click="getTVSeriesDetails(item.id)" style="padding: 5px 10px; margin-top: 10px;">Show reviews</button>
         <div v-if="selectedTVSeries && selectedTVSeriesId === item.id" style=" background-color: #b5b1b1; border: 1px solid black; border-radius: 8px; padding: 20px; margin-top: 10px; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);">
           <h3>Selected TV series Reviews:</h3>
           <div v-for="(review, index) in selectedTVSeries" :key="index">
@@ -29,6 +40,7 @@
 
 <script>
 import axios from 'axios'
+import { getAuth } from 'firebase/auth'
 
 export default {
   data () {
@@ -36,7 +48,13 @@ export default {
       searchInput: '',
       searchResults: [],
       selectedTVSeries: null,
-      selectedTVSeriesId: null
+      selectedTVSeriesId: null,
+      addReviewTVSeriesId: null,
+      newReview: {
+        komentar: '',
+        ocjena: ''
+      },
+      userId: null
     }
   },
   methods: {
@@ -64,10 +82,37 @@ export default {
       } catch (error) {
         console.error('Error getting TV series details:', error)
       }
+    },
+    showAddReviewForm (id) {
+      this.addReviewTVSeriesId = id
+      this.newReview = {
+        komentar: '',
+        ocjena: ''
+      }
+    },
+    async addReview (id, name) {
+      if (!this.newReview.komentar || !this.newReview.ocjena) {
+        alert('Both comment and rating are required.')
+        return
+      }
+      try {
+        await axios.post('http://localhost:3000/recenzije?collection=serija&movieOrSeriesId=' + id + '&komentar=' + this.newReview.komentar + '&ocjena=' + this.newReview.ocjena + '&korisnikUID=' + this.userId)
+        this.addReviewTVSeriesId = null
+        this.getTVSeriesDetails(id)
+      } catch (error) {
+        console.error('Error adding review:', error)
+      }
     }
   },
   created () {
     this.fetchAllTVSeries()
+    getAuth().onAuthStateChanged(async (user) => {
+      if (user) {
+        this.userId = user.uid
+      } else {
+        console.log('No user is signed in')
+      }
+    })
   }
 }
 </script>

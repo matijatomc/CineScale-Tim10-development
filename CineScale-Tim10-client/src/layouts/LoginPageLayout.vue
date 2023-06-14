@@ -20,11 +20,18 @@
   </q-layout>
 </template>
 <script>
+import { useRouter } from 'vue-router'
 export default {
   name: 'LoginPageLayout',
-  methods: {
-    openWelcomePage () {
-      this.$router.push('/')
+  setup () {
+    const router = useRouter()
+
+    function openWelcomePage () {
+      router.push('/')
+    }
+
+    return {
+      openWelcomePage
     }
   }
 }

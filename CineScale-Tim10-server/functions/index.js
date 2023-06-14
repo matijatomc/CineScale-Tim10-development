@@ -89,7 +89,7 @@ app.get('/recenzije', async (req, res) => {
 
     for (const doc of moviesOrSeriesSnapshot.docs) {
       const movieOrSeriesId = doc.id;
-      const movieOrSeriesName = doc.data().naziv; // assuming there is a 'name' field in the document
+      const movieOrSeriesName = doc.data().naziv;
       const reviewsSnapshot = await db.collection(collection)
                                       .doc(movieOrSeriesId)
                                       .collection('recenzije')
@@ -99,7 +99,9 @@ app.get('/recenzije', async (req, res) => {
       reviewsSnapshot.forEach(reviewDoc => {
         const review = reviewDoc.data();
         review.movieOrSeriesId = movieOrSeriesId;
-        review.movieOrSeriesName = movieOrSeriesName; // Add the movie or series name to the review
+        review.movieOrSeriesName = movieOrSeriesName;
+        review.collection = collection;
+        review.reviewId = reviewDoc.id;
         reviews.push(review);
       });
     }
@@ -145,6 +147,30 @@ app.post('/serija', async (req, res) => {
   }
 });
 
+app.post('/recenzije', async (req, res) => {
+  const { collection, movieOrSeriesId, komentar, ocjena, korisnikUID } = req.query;
+
+  if (!collection || !movieOrSeriesId || !komentar || !ocjena || !korisnikUID) {
+    return res.status(400).json({ error: 'All parameters (collection, movieOrSeriesId, komentar, ocjena, korisnikUID) are required.' });
+  }
+
+  try {
+    await db.collection(collection)
+      .doc(movieOrSeriesId)
+      .collection('recenzije')
+      .add({
+        komentar: komentar,
+        ocjena: ocjena,
+        korisnikUID: korisnikUID
+      });
+
+    res.json({ message: 'Review added successfully!' });
+  } catch (error) {
+    console.error('Error adding review:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.put('/film', async (req, res) => {
   let id = (
     typeof req.query.id !== 'undefined'
@@ -182,6 +208,42 @@ app.put('/serija', async (req, res) => {
       brojEpizoda: brojEpizoda
     })
     res.status(201).json({ message: 'Document changet successfully', id: result.id });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.put('/recenzije', async (req, res) => {
+  let movieOrSeriesId = (
+    typeof req.query.movieOrSeriesId !== 'undefined'
+      ? req.query.movieOrSeriesId
+      : null
+  )
+  let collection = (
+    typeof req.query.collection !== 'undefined'
+      ? req.query.collection
+      : null
+  )
+  let reviewId = (
+    typeof req.query.reviewId !== 'undefined'
+      ? req.query.reviewId
+      : null
+  )
+  
+  if (!movieOrSeriesId || !collection || !reviewId) {
+    return res.status(400).json({ error: 'movieOrSeriesId, collection, and reviewId parameters are required.' });
+  }
+
+  try {
+    const { komentar, ocjena } = req.query;
+    const result = await db.collection(collection).doc(movieOrSeriesId)
+                            .collection('recenzije').doc(reviewId)
+                            .update({
+                              komentar: komentar,
+                              ocjena: ocjena
+                            });
+    res.status(201).json({ message: 'Review updated successfully', id: result.id });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error' });
@@ -229,6 +291,27 @@ app.delete('/serija', (request, response) => {
     )
   }
 })
+
+app.delete('/recenzije', async (req, res) => {
+  const { collection, movieOrSeriesId, reviewId } = req.query;
+
+  if (!collection || !movieOrSeriesId || !reviewId) {
+    return res.status(400).json({ error: 'The collection, movieOrSeriesId and reviewId parameters are required.' });
+  }
+
+  try {
+    await db.collection(collection)
+      .doc(movieOrSeriesId)
+      .collection('recenzije')
+      .doc(reviewId)
+      .delete();
+
+    res.json({ message: 'Review successfully deleted!' });
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 app.listen(3000, () => {
   console.log("Server running on port 3000");
